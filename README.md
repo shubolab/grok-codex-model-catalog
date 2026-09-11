@@ -22,7 +22,7 @@ Codex 0.153.x 的 `model_catalog_json` 是 **严格 serde 必填字段**，不�
 | 文件 | 作用 |
 | --- | --- |
 | `grok-4.6-catalog.json` | 最小可解析 catalog |
-| `README.md` | 说明、安装、推理档位、时段说明 |
+| `README.md` | 说明、安装、推理档位、最佳实践 |
 | `LICENSE` | MIT |
 
 不包含 token、`config.toml`、中转地址或任何密钥。
@@ -103,17 +103,15 @@ model_reasoning_effort = "xhigh"
 
 不要在这份 catalog 里加 `ultra` / `max`，除非你的中转明确会把它们映射成 xAI 认识的档位。
 
-## 有没有“最佳时间”
+## 最佳实践
 
-**没有官方最佳时段。** xAI 文档只给模型能力、价格、reasoning effort，不公布“几点钟更快”。
+质量看档位和缓存，不看几点钟。xAI 没有公布“最佳时段”。
 
-公开能确认的是：
-
-- 质量主要看 `reasoning_effort`，不是墙上的钟。
-- 长对话请尽量保持 system prompt 稳定，并使用网关支持的 prompt cache key（xAI 官方叫 `prompt_cache_key`），否则容易打到冷缓存、多付钱。
-- 第三方中转的排队和官方 API 不是一回事，网上的“美国白天更堵、北京时间凌晨更顺”最多是启发式，**未经验证**，不能当成 SLA。
-
-若只是经验法则（非承诺）：北京时间大约 01:00–08:00 往往比美西工作时间更空。真正有效的还是 `high` / `xhigh` + 稳定 prompt + 中转是否限流。
+- 日常用 `high`（官方默认）；难任务 `xhigh`；短循环才 `low`。推理关不掉。
+- 长会话固定 system prompt 前缀，Responses 上设 `prompt_cache_key`（Chat Completions 用 `x-grok-conv-id`）。否则容易打到冷缓存、多付钱。
+- 超长 agent 循环用 context compaction，别把整段工具输出反复原样塞回去。
+- 工具多就走 function calling；网关必须是 Responses，别开 OpenAI-only 的 lite / search / Fast。
+- catalog 只留短身份说明。上下文按官方 500K，除非中转明确转发更大窗口。
 
 ## 中转注意
 
