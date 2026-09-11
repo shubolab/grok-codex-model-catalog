@@ -1,0 +1,44 @@
+{
+  "models": [
+    {
+      "slug": "grok-4.6",
+      "display_name": "Grok 4.6",
+      "description": "xAI Grok 4.6 through an OpenAI-compatible Responses relay.",
+      "default_reasoning_level": "high",
+      "supported_reasoning_levels": [
+        {
+          "effort": "low",
+          "description": "Faster loops and simple tool calling"
+        },
+        {
+          "effort": "medium",
+          "description": "More thinking for long-context analysis"
+        },
+        {
+          "effort": "high",
+          "description": "Deeper reasoning (xAI default)"
+        },
+        {
+          "effort": "xhigh",
+          "description": "Maximum reasoning depth"
+        }
+      ],
+      "shell_type": "unified_exec",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 1,
+      "support_verbosity": true,
+      "default_verbosity": "high",
+      "context_window": 500000,
+      "max_context_window": 500000,
+      "include_skills_usage_instructions": true,
+      "include_plugin_usage_instructions": true,
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "experimental_supported_tools": [],
+      "base_instructions": "You are Grok 4.6 running in Codex, a coding agent.\nBe precise, safe, and helpful. Prefer tools over speculation.\nFollow AGENTS.md in the workspace. Keep answers concise unless the user asks for more detail."
+    }
+  ]
+}
