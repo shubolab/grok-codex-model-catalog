@@ -22,7 +22,7 @@ Codex 0.153.x 的 `model_catalog_json` 是 **严格 serde 必填字段**，不�
 | 文件 | 作用 |
 | --- | --- |
 | `grok-4.6-catalog.json` | 最小可解析 catalog |
-| `README.md` | 说明、安装、推理档位、最佳实践 |
+| `README.md` | 说明、安装、推理档位 |
 | `LICENSE` | MIT |
 
 不包含 token、`config.toml`、中转地址或任何密钥。
@@ -102,16 +102,6 @@ model_reasoning_effort = "xhigh"
 ```
 
 不要在这份 catalog 里加 `ultra` / `max`，除非你的中转明确会把它们映射成 xAI 认识的档位。
-
-## 最佳实践
-
-质量看档位和缓存，不看几点钟。xAI 没有公布“最佳时段”。
-
-- 日常用 `high`（官方默认）；难任务 `xhigh`；短循环才 `low`。推理关不掉。
-- 长会话固定 system prompt 前缀，Responses 上设 `prompt_cache_key`（Chat Completions 用 `x-grok-conv-id`）。否则容易打到冷缓存、多付钱。
-- 超长 agent 循环用 context compaction，别把整段工具输出反复原样塞回去。
-- 工具多就走 function calling；网关必须是 Responses，别开 OpenAI-only 的 lite / search / Fast。
-- catalog 只留短身份说明。上下文按官方 500K，除非中转明确转发更大窗口。
 
 ## 中转注意
 
