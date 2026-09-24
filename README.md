@@ -1,10 +1,10 @@
 # grok-codex-catalog
 
-给 Codex 用的 **最小** Grok 4.6 模型目录（`model_catalog_json`）。
+给 Codex 用的 **最小** Grok 4.x 模型目录（`model_catalog_json`）。一份文件里放 `grok-4.7`、`grok-4.6`、`grok-4.5`，选择器里可以切换。
 
-本仓库不是代理、不是鉴权配置、也不是把 GPT-5.2 那两万多字系统提示克隆过来。它只提供 Codex CLI / Desktop 在自定义 Responses 中转上识别 `grok-4.6` 所必需的字段。
+本仓库不是代理、不是鉴权配置、也不是把 GPT-5.2 那两万多字系统提示克隆过来。它只提供 Codex CLI / Desktop 在自定义 Responses 中转上识别这些 slug 所必需的字段。
 
-适用场景：你已经有 OpenAI-compatible 的 Responses 网关（例如自建中转），`config.toml` 里 `model = "grok-4.6"`，但 Codex 内置目录里没有这个 slug，需要一份能被当前 Codex 解析器接受的 catalog。
+适用场景：你已经有 OpenAI-compatible 的 Responses 网关（例如自建中转），`config.toml` 里 `model` 要在这三条之间切换，但 Codex 内置目录里没有这些 slug。
 
 ## 为什么需要它
 
@@ -13,15 +13,15 @@ Codex 0.153.x 的 `model_catalog_json` 是 **严格 serde 必填字段**，不�
 - 只写 `slug` / `display_name` 会直接报缺字段。
 - `base_instructions` 和 `model_messages.instructions_template` **二选一即可**。不必两份都塞。
 - 短身份说明就够。不必复制内置 GPT 模型那份超长 instructions。
-- 这份 JSON **会替换** 内置模型列表，所以仓库只放 `grok-4.6` 一条。
+- 这份 JSON **会替换** 内置模型列表。三条都在同一个 `models` 数组里，`/model` 里就会同时出现。
 
-本仓库用 `codex debug models -c model_catalog_json=...` 实测过：约 1.4 KB 即可通过解析。
+本仓库用 `codex debug models -c model_catalog_json=...` 实测过。
 
 ## 仓库里有什么
 
 | 文件 | 作用 |
 | --- | --- |
-| `grok-4.6-catalog.json` | 最小可解析 catalog |
+| `grok-4.x-catalog.json` | `grok-4.7` / `grok-4.6` / `grok-4.5` |
 | `README.md` | 说明、安装、推理档位 |
 | `LICENSE` | MIT |
 
@@ -29,18 +29,20 @@ Codex 0.153.x 的 `model_catalog_json` 是 **严格 serde 必填字段**，不�
 
 ## 安装（你自己放到合适的位置）
 
-1. 把 `grok-4.6-catalog.json` 拷到稳定路径，例如：
+1. 把 `grok-4.x-catalog.json` 拷到稳定路径，例如：
 
 ```text
-%USERPROFILE%\.codex\grok-4.6-catalog.json
+%USERPROFILE%\.codex\grok-4.x-catalog.json
 ```
 
 2. 在 `%USERPROFILE%\.codex\config.toml` 里加（Windows 路径用双反斜杠）：
 
 ```toml
-model = "grok-4.6"
-model_catalog_json = "C:\\Users\\<you>\\.codex\\grok-4.6-catalog.json"
+model = "grok-4.7"
+model_catalog_json = "C:\\Users\\<you>\\.codex\\grok-4.x-catalog.json"
 ```
+
+`model` 也可以写成 `grok-4.6` 或 `grok-4.5`。三条都在同一份 catalog 里，之后用 `/model` 切换即可。
 
 3. 重启 Codex Desktop / CLI。
 
@@ -49,10 +51,10 @@ model_catalog_json = "C:\\Users\\<you>\\.codex\\grok-4.6-catalog.json"
 校验：
 
 ```powershell
-codex debug models -c "model_catalog_json=C:/Users/<you>/.codex/grok-4.6-catalog.json"
+codex debug models -c "model_catalog_json=C:/Users/<you>/.codex/grok-4.x-catalog.json"
 ```
 
-成功时应看到 `n_models=1`、slug `grok-4.6`。
+成功时应看到 3 个模型，slug 为 `grok-4.7`、`grok-4.6`、`grok-4.5`。
 
 ## 字段说明（只保留必要项）
 
@@ -72,7 +74,7 @@ Codex 解析器真正必填的是这些：
 其余是可选增强。本文件额外写了这些，因为它们会改变默认行为，而不是为了“看起来完整”：
 
 - `default_reasoning_level = "high"`：对齐 xAI 官方默认。
-- `context_window` / `max_context_window = 500000`：对齐 xAI 公开的 500K。
+- `context_window` / `max_context_window = 500000`：三条都对齐 xAI 公开的 500K。
 - `default_verbosity = "high"`：方便 agent 工作。
 - `include_skills_usage_instructions` / `include_plugin_usage_instructions = true`：保留 Codex skills / plugins 提示。
 
@@ -86,7 +88,15 @@ Codex 解析器真正必填的是这些：
 
 ## 推理档位
 
-xAI 官方：`grok-4.6` 支持 `low` / `medium` / `high` / `xhigh`，**默认 `high`**，推理不能关掉。
+三条都不能关掉推理，默认都是 `high`。
+
+| 模型 | Codex 里列出的档位 |
+| --- | --- |
+| `grok-4.7` | `low` / `medium` / `high` / `xhigh` |
+| `grok-4.6` | `low` / `medium` / `high` / `xhigh` |
+| `grok-4.5` | `low` / `medium` / `high` / `xhigh` |
+
+`xhigh` 从 `grok-4.6` 起才是独立档位。xAI 对 `grok-4.5` 收到的 `xhigh` 按 `high` 处理，请求不会因此 400，所以这里仍列出来，避免切到 4.5 时选择器把这一档拿掉。
 
 | 档位 | 什么时候用 |
 | --- | --- |
@@ -107,12 +117,15 @@ model_reasoning_effort = "xhigh"
 
 - 网关必须走 **Responses**（`wire_api = "responses"`），不是只实现了 Chat Completions 就够。
 - 不要打开 OpenAI-only 的 lite / web search / Fast 档位。
-- catalog 替换内置列表后，模型选择器里通常只剩 `Grok 4.6`。
+- catalog 替换内置列表后，模型选择器里就是这三条。
 - 上下文先按 500K 配。只有当你确认网关真的转发更大窗口时再改。
+- `grok-4.7` 在 Responses API 上总会返回 `reasoning.encrypted_content`。多轮对话要把这些 reasoning item 原样带回下一次请求的 `input`，中转不要剥掉。
 
 ## 参考
 
+- [xAI Grok 4.7](https://docs.x.ai/developers/grok-4-7)
 - [xAI Grok 4.6](https://docs.x.ai/developers/grok-4-6)
+- [xAI Grok 4.5](https://docs.x.ai/developers/models/grok-4-5)
 - [xAI Reasoning](https://docs.x.ai/developers/model-capabilities/text/reasoning)
 - [Codex config reference](https://developers.openai.com/codex/config-file/config-reference.md)
 
